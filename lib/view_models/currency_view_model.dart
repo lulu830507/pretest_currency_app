@@ -5,19 +5,14 @@ import '../models/currency_model.dart';
 import '../repositories/currency_repositories.dart';
 import 'currency_converter_state.dart';
 
-// Provider
-final currencyRepositoryProvider = Provider<CurrencyRepository>(
-      (ref) => CurrencyRepository(),
-);
-
 final currencyViewModelProvider = StateNotifierProvider.autoDispose<CurrencyConverterViewModel, CurrencyConverterState>((ref) {
-  return CurrencyConverterViewModel(currencyRepository: ref.read(currencyRepositoryProvider));
+  final currencies = ref.watch(currencyProvider).value ?? [];
+  return CurrencyConverterViewModel(currencies: currencies);
 });
 class CurrencyConverterViewModel extends StateNotifier<CurrencyConverterState> {
-  final CurrencyRepository currencyRepository;
   final TextEditingController amountController = TextEditingController();
 
-  CurrencyConverterViewModel({required this.currencyRepository})
+  CurrencyConverterViewModel({required List<Currency> currencies})
       : super(
     CurrencyConverterState(
       amount: 0,
@@ -25,22 +20,9 @@ class CurrencyConverterViewModel extends StateNotifier<CurrencyConverterState> {
       showError: false,
       fromCurrency: null,
       toCurrency: null,
-      currencies: [],
+      currencies: currencies, // 這裡直接拿到 currencies
     ),
-  ) {
-    fetchCurrencies();
-  }
-
-  Future<void> fetchCurrencies() async {
-    try {
-      final currencies = await currencyRepository.fetchCurrencies();
-      state = state.copyWith(currencies: currencies);
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching currencies: $e');
-      }
-    }
-  }
+  );
 
   // 設置貨幣
   void setFromCurrency(Currency? currency) {
@@ -126,25 +108,8 @@ class CurrencyConverterViewModel extends StateNotifier<CurrencyConverterState> {
     );
   }
 
-  // 清空輸入框
-  void resetInput() {
-    amountController.clear();
-    state = state.copyWith(
-      fromCurrency: null,
-      toCurrency: null,
-      amount: 0,
-      result: 0.0,
-      showError: false,
-      currencies: state.currencies,
-    );
-    if (kDebugMode) {
-      print('Reset Input: fromCurrency = ${state.fromCurrency}, toCurrency = ${state.toCurrency}');
-    }
-  }
-
   @override
   void dispose() {
-    resetInput();
     amountController.dispose();
     super.dispose();
   }

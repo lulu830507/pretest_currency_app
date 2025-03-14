@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
 import '../models/currency_model.dart';
 
 class CurrencyItem extends ConsumerWidget {
@@ -24,7 +26,7 @@ class CurrencyItem extends ConsumerWidget {
       title: Text('${currency.currency} / TWD'),
       trailing: Text(
         numberFormat.format(currency.twdPrice),
-        style: TextStyle(fontWeight: FontWeight.bold),
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
       ),
     );
   }

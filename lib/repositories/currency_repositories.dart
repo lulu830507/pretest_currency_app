@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/currency_model.dart';
@@ -16,3 +17,15 @@ class CurrencyRepository {
     }
   }
 }
+
+// Provider 只提供 Repository
+final currencyRepositoryProvider = Provider<CurrencyRepository>(
+      (ref) => CurrencyRepository(),
+);
+
+// FutureProvider 負責監聽 API 資料
+final currencyProvider = FutureProvider<List<Currency>>((ref) {
+  final repository = ref.watch(currencyRepositoryProvider);
+  return repository.fetchCurrencies();
+});
+

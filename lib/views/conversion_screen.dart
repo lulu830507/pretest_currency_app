@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../repositories/currency_repositories.dart';
 import '../view_models/currency_view_model.dart';
 import '../widgets/currency_converter.dart';
 
@@ -8,15 +9,17 @@ class ConversionScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(currencyViewModelProvider);
+    final currencyAsyncValue = ref.watch(currencyProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Rate Conversion'),
       ),
-      body: state.currencies.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : CurrencyConverter(),
+      body:currencyAsyncValue.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(child: Text('Error: $error')),
+        data: (currencies) => CurrencyConverter(currencies: currencies), // 傳遞資料到 CurrencyConverter
+      ),
     );
   }
 }

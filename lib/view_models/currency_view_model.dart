@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,31 +6,36 @@ import '../models/currency_model.dart';
 import '../repositories/currency_repositories.dart';
 import 'currency_converter_state.dart';
 
-final currencyViewModelProvider = StateNotifierProvider.autoDispose<CurrencyConverterViewModel, CurrencyConverterState>((ref) {
+final currencyViewModelProvider = StateNotifierProvider.autoDispose<
+  CurrencyConverterViewModel,
+  CurrencyConverterState
+>((ref) {
   final currencies = ref.watch(currencyProvider).value ?? [];
   return CurrencyConverterViewModel(currencies: currencies);
 });
+
 class CurrencyConverterViewModel extends StateNotifier<CurrencyConverterState> {
   final TextEditingController amountController = TextEditingController();
 
   CurrencyConverterViewModel({required List<Currency> currencies})
-      : super(
-    CurrencyConverterState(
-      amount: 0,
-      result: 0.0,
-      showError: false,
-      fromCurrency: null,
-      toCurrency: null,
-      currencies: currencies, // 這裡直接拿到 currencies
-    ),
-  );
+    : super(
+        CurrencyConverterState(
+          amount: 0,
+          result: 0.0,
+          showError: false,
+          fromCurrency: null,
+          toCurrency: null,
+          currencies: currencies, // 直接拿到 currencies
+        ),
+      );
 
   // 設置貨幣
   void setFromCurrency(Currency? currency) {
     // 更新 fromCurrency 時，保留其他狀態
     state = state.copyWith(
       fromCurrency: currency,
-      toCurrency: state.toCurrency, // 保留現有 toCurrency
+      toCurrency: state.toCurrency,
+      // 保留現有 toCurrency
       amount: state.amount,
       result: state.result,
       showError: state.showError,
@@ -41,7 +47,8 @@ class CurrencyConverterViewModel extends StateNotifier<CurrencyConverterState> {
   void setToCurrency(Currency? currency) {
     // 更新 toCurrency 時，保留其他狀態
     state = state.copyWith(
-      fromCurrency: state.fromCurrency, // 保留現有 fromCurrency
+      fromCurrency: state.fromCurrency,
+      // 保留現有 fromCurrency
       toCurrency: currency,
       amount: state.amount,
       result: state.result,
@@ -96,10 +103,16 @@ class CurrencyConverterViewModel extends StateNotifier<CurrencyConverterState> {
       return;
     }
 
-    // 正常計算轉換結果
-    final result = state.amount * (fromCurrency.twdPrice / toCurrency.twdPrice);
+    // 使用 Decimal 進行精確運算
+    final amount = Decimal.parse(state.amount.toString());
+    final fromPrice = Decimal.parse(fromCurrency.twdPrice.toString());
+    final toPrice = Decimal.parse(toCurrency.twdPrice.toString());
+
+    final result = amount * (fromPrice / toPrice).toDecimal(scaleOnInfinitePrecision: 18);
+
+
     state = state.copyWith(
-      result: result,
+      result: result.toDouble(),
       showError: false,
       fromCurrency: state.fromCurrency,
       toCurrency: state.toCurrency,

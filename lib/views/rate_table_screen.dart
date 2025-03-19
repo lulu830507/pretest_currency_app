@@ -22,12 +22,11 @@ class RateTableScreen extends ConsumerWidget {
               child: ListView.builder(
                 itemCount: currencies.length,
                 itemBuilder: (context, index) {
+                  // 使用 id 辨識
                   final currency = currencies[index];
-                  // 使用 Consumer 監聽單一 Currency 數據達到局部更新
-                  return Consumer(
-                    builder: (context, ref, _) {
-                      return CurrencyItem(currency: currency);
-                    },
+                  return CurrencyItem(
+                    key: ValueKey(currency.id),
+                    currency: currency,
                   );
                 },
               ),

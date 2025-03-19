@@ -1,5 +1,4 @@
 import 'package:decimal/decimal.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/currency_model.dart';
@@ -104,15 +103,18 @@ class CurrencyConverterViewModel extends StateNotifier<CurrencyConverterState> {
     }
 
     // 使用 Decimal 進行精確運算
-    final amount = Decimal.parse(state.amount.toString());
-    final fromPrice = Decimal.parse(fromCurrency.twdPrice.toString());
-    final toPrice = Decimal.parse(toCurrency.twdPrice.toString());
+    final amount = state.amount.toString().toDecimal();
+    final fromPrice = fromCurrency.twdPrice.toString().toDecimal();
+    final toPrice = toCurrency.twdPrice.toString().toDecimal();
 
-    final result = amount * (fromPrice / toPrice).toDecimal(scaleOnInfinitePrecision: 18);
+    final safeToPrice = toPrice == Decimal.zero ? Decimal.one : toPrice;
 
+    final ratio = Decimal.parse((fromPrice / safeToPrice).toDouble().toString());
+    // 計算結果並轉換為 double
+    final result = (amount * ratio).toDouble();
 
     state = state.copyWith(
-      result: result.toDouble(),
+      result: result,
       showError: false,
       fromCurrency: state.fromCurrency,
       toCurrency: state.toCurrency,
@@ -125,5 +127,17 @@ class CurrencyConverterViewModel extends StateNotifier<CurrencyConverterState> {
   void dispose() {
     amountController.dispose();
     super.dispose();
+  }
+}
+
+extension DecimalParsing on String? {
+  Decimal toDecimal({Decimal? fallback}) {
+    // 避免 null 和空字串的錯誤
+    if (this == null || this!.trim().isEmpty) return fallback ?? Decimal.zero;
+    try {
+      return Decimal.parse(this!);
+    } catch (e) {
+      return fallback ?? Decimal.zero;
+    }
   }
 }

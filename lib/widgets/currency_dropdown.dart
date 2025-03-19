@@ -19,7 +19,7 @@ class CurrencyDropdown extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 只監聽選中的貨幣，避免 UI 重繪
+    // 只監聽選中的貨幣 避免 UI 重繪
     final selectedCurrency = ref.watch(currencyViewModelProvider.select((state) =>
     isFromCurrency ? state.fromCurrency : state.toCurrency));
 

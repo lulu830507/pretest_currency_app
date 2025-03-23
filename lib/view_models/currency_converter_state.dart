@@ -4,7 +4,7 @@ class CurrencyConverterState {
   final Currency? fromCurrency;
   final Currency? toCurrency;
   final double amount;
-  final double result;
+  final String result;
   final bool showError;
   final List<Currency> currencies;
 
@@ -21,7 +21,7 @@ class CurrencyConverterState {
     Currency? fromCurrency,
     Currency? toCurrency,
     double? amount,
-    double? result,
+    String? result,
     bool? showError,
     List<Currency>? currencies,
   }) {

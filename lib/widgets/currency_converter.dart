@@ -14,7 +14,7 @@ class CurrencyConverter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final viewModel = ref.read(
       currencyViewModelProvider.notifier,
-    ); // 只需要 ViewModel，不需要監聽
+    ); // 只需要 ViewModel 不需要監聽
     final state = ref.watch(currencyViewModelProvider); // 用來處理 UI 顯示的狀態
     return CurrencyConverterForm(
         currencies: currencies,
@@ -94,12 +94,9 @@ class CurrencyConverterForm extends ConsumerWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    viewModel.amountController.text.isEmpty ||
-                            state.result == 0.0
+                    viewModel.amountController.text.isEmpty || state.result.isEmpty
                         ? ''
-                        : state.result.toStringAsFixed(
-                          state.toCurrency?.amountDecimal ?? 2,
-                        ),
+                        : state.result,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

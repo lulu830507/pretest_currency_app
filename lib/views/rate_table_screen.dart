@@ -9,53 +9,59 @@ class RateTableScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currencyAsyncValue = ref.watch(currencyProvider); // 直接監聽 currencyProvider
+    final currencyAsyncValue = ref.watch(
+      currencyProvider,
+    ); // 直接監聽 currencyProvider
 
     return Scaffold(
       appBar: AppBar(title: const Text('Rate Table (TWD)')),
-      body: currencyAsyncValue.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(child: Text('Failed to load data')),
-        data: (currencies) => Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: currencies.length,
-                itemBuilder: (context, index) {
-                  // 使用 id 辨識
-                  final currency = currencies[index];
-                  return CurrencyItem(
-                    key: ValueKey(currency.id),
-                    currency: currency,
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    side: const BorderSide(color: Colors.black, width: 1),
+      body: currencyAsyncValue.maybeWhen( // 避免整個 Scaffold 重建
+        orElse: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => const Center(child: Text('Failed to load data')),
+        data: (currencies) => CustomScrollView(
+              // CustomScrollView + SliverList
+              slivers: [
+                SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final currency = currencies[index];
+                    return CurrencyItem(
+                      key: ValueKey(currency.id),
+                      currency: currency,
+                    );
+                  }, childCount: currencies.length),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 50,vertical: 20),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          side: const BorderSide(color: Colors.black, width: 1),
+                        ),
+                        backgroundColor: Colors.white,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ConversionScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Rate Conversion',
+                        style: TextStyle(fontSize: 16, color: Colors.black),
+                      ),
+                    ),
                   ),
-                  backgroundColor: Colors.white,
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ConversionScreen()),
-                  );
-                },
-                child: const Text(
-                  'Rate Conversion',
-                  style: TextStyle(fontSize: 16, color: Colors.black),
-                ),
-              ),
+              ],
             ),
-          ],
-        ),
       ),
     );
   }

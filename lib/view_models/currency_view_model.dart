@@ -20,7 +20,7 @@ class CurrencyConverterViewModel extends StateNotifier<CurrencyConverterState> {
     : super(
         CurrencyConverterState(
           amount: 0,
-          result: 0.0,
+          result: '',
           showError: false,
           fromCurrency: null,
           toCurrency: null,
@@ -79,7 +79,7 @@ class CurrencyConverterViewModel extends StateNotifier<CurrencyConverterState> {
     // 若未選擇幣別，僅更新錯誤狀態，並保留現有的貨幣選擇
     if (fromCurrency == null || toCurrency == null) {
       state = state.copyWith(
-        result: 0.0,
+        result: '',
         showError: true,
         fromCurrency: state.fromCurrency,
         toCurrency: state.toCurrency,
@@ -92,7 +92,7 @@ class CurrencyConverterViewModel extends StateNotifier<CurrencyConverterState> {
     // 若 amount 為 0 或輸入框為空，僅更新錯誤狀態，並保留現有選擇
     if (state.amount <= 0 || amountController.text.trim().isEmpty) {
       state = state.copyWith(
-        result: 0.0,
+        result: '',
         showError: true,
         fromCurrency: state.fromCurrency,
         toCurrency: state.toCurrency,
@@ -111,7 +111,7 @@ class CurrencyConverterViewModel extends StateNotifier<CurrencyConverterState> {
 
     final ratio = Decimal.parse((fromPrice / safeToPrice).toDouble().toString());
     // 計算結果並轉換為 double
-    final result = (amount * ratio).toDouble();
+    final result = (amount * ratio).toString();
 
     state = state.copyWith(
       result: result,
